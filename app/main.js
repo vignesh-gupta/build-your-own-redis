@@ -11,8 +11,8 @@ const server = net.createServer((connection) => {
 
     console.log(connections);
 
-    let res = "";
-    Array.from({ length: connections.length - 1 }).forEach((_, index) => {
+    let res = "+PONG\r\n";
+    Array.from({ length: connections.length - 2 }).forEach((_, index) => {
       res += "+PONG\r\n";
     });
 
