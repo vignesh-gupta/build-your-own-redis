@@ -7,16 +7,10 @@ console.log("Logs from your program will appear here!");
 const server = net.createServer((connection) => {
   connection.write("+PONG\r\n");
   connection.on("data", (data) => {
-    const connections = data.toString().split("PING");
-
-    console.log(connections);
-
-    let res = "+PONG\r\n";
-    Array.from({ length: connections.length - 2 }).forEach((_, index) => {
-      res += "+PONG\r\n";
-    });
-
-    connection.write(res);
+    if (data.toString() === "*1\r\n$4\r\nPING\r\n") {
+      connection.write("+PONG\r\n");
+    }
+    connection.end();
   });
 });
 
