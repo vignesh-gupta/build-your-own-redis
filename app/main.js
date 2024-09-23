@@ -1,16 +1,42 @@
 const net = require("net");
+const Parser = require("redis-parser");
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-console.log("Logs from your program will appear here!");
+const store = {};
 
 // Uncomment this block to pass the first stage
 const server = net.createServer((connection) => {
   connection.write("+PONG\r\n");
   connection.on("data", (data) => {
-    if (data.toString() === "*1\r\n$4\r\nPING\r\n") {
-      connection.write("+PONG\r\n");
-    }
-    connection.end();
+    const parser = new Parser({
+      returnReply: (reply) => {
+        const command = reply[0].toUpperCase();
+
+        switch (command) {
+          case "SET":
+            {
+              const key = reply[1];
+              const value = reply[2];
+              store[key] = value;
+              connection.write("+OK\r\n");
+            }
+            break;
+
+          case "GET":
+            {
+              const key = reply[1];
+              const value = store[key];
+              if (!value) connection.write("$-1\r\n");
+              else connection.write(`$${value.length}\r\n${value}\r\n`);
+            }
+            break;
+        }
+      },
+      returnError: (err) => {
+        console.log(err);
+      },
+    });
+
+    parser.execute(data);
   });
 });
 
